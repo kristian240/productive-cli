@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 const fs = require('fs');
 const homedir = require('os').homedir();
 const format = require('date-fns/format');
