@@ -19,6 +19,7 @@ Commands:
   productive-cli init    Init the cli
   productive-cli config  Add new services
   productive-cli clock   Create a new entry
+  productive-cli stats   Show stats
 
 Options:
   --version      Show version number                                   [boolean]
