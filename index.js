@@ -11,6 +11,7 @@ const argv = require('yargs')
   .command('init', 'Init the cli')
   .command('config', 'Add new services')
   .command('clock', 'Create a new entry')
+  .command('stats', 'Show stats')
   .alias('s', 'service')
   .nargs('s', 1)
   .describe('s', 'Service')
@@ -172,6 +173,24 @@ async function getConfig() {
   }
 }
 
+async function showStats(headers, userId, today) {
+  // console.log('Worked:', '10 hours');
+  const entires = await get(
+    `time_entries?filter[person_id]=${userId}&filter[before]=${today}&filter[after]=${today}`,
+    headers,
+  );
+
+  if (!entires.data.length) {
+    return;
+  }
+
+  const totalMinutes = entires.data.map((e) => e.attributes.time).reduce((prev, acc) => prev + acc);
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+
+  console.log('Worked today:', hours || 0, 'h', minutes || 0, 'min');
+}
+
 async function app() {
   const today = format(new Date(), 'yyyy-MM-dd');
 
@@ -192,6 +211,11 @@ async function app() {
     'X-Auth-Token': config.token,
     'X-Organization-Id': config.orgId,
   };
+
+  if (argv['_'][0] === 'stats') {
+    await showStats(headers, config.userId, today);
+    return;
+  }
 
   if (argv['_'][0] === 'config') {
     const service = await createNewProjectEntry(today, headers);
