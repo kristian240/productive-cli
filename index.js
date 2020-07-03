@@ -215,7 +215,7 @@ async function app() {
     // user told us only the service
     const { pick } =
       typeof argv.service !== 'undefined'
-        ? { pick: config.services[argv.service].serviceId }
+        ? { pick: argv.service === 'food' ? 'food' : config.services[argv.service].serviceId }
         : await inquirer.prompt([
             {
               type: 'list',
