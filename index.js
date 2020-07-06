@@ -49,12 +49,12 @@ async function post(path, data, headers) {
 async function clockFood(headers, config, today) {
   const matchingDeal = await get(
     `deals?filter[query]=operations%20general&filter[date][lt_eq]=${today}&filter[end_date][gt_eq]=${today}`,
-    headers,
+    headers
   );
 
   const matchingService = await get(
     `services?filter[name]=food&filter[deal_id]=${matchingDeal.data[0].id}`,
-    headers,
+    headers
   );
 
   const userId = config.userId;
@@ -77,14 +77,14 @@ async function clockFood(headers, config, today) {
         type: 'time-entries',
       },
     },
-    headers,
+    headers
   );
 }
 
 async function findDeal(search, headers, today) {
   const matchingDeal = await get(
-    `deals?filter[query]=${search}&filter[date][lt_eq]=${today}`,
-    headers,
+    `deals?filter[query]=${search}&filter[date][lt_eq]=${today}&filter[end_date][gt_eq]=${today}`,
+    headers
   );
   return matchingDeal.data.map((d) => ({
     value: d.id,
@@ -93,11 +93,8 @@ async function findDeal(search, headers, today) {
 }
 
 async function findService(dealId, headers) {
-  const matchinService = await get(
-    `services?filter[name]=senior&filter[deal_id]=${dealId}`,
-    headers,
-  );
-  return matchinService.data.map((d) => ({ value: d.id, name: d.attributes.name }));
+  const matchingService = await get(`services?filter[deal_id]=${dealId}`, headers);
+  return matchingService.data.map((d) => ({ value: d.id, name: d.attributes.name }));
 }
 
 async function createTimeEntry(time, note, today, userId, serviceId, headers) {
@@ -118,7 +115,7 @@ async function createTimeEntry(time, note, today, userId, serviceId, headers) {
         type: 'time-entries',
       },
     },
-    headers,
+    headers
   );
 }
 
@@ -177,7 +174,7 @@ async function showStats(headers, userId, today) {
   // console.log('Worked:', '10 hours');
   const entires = await get(
     `time_entries?filter[person_id]=${userId}&filter[before]=${today}&filter[after]=${today}`,
-    headers,
+    headers
   );
 
   if (!entires.data.length) {
@@ -268,7 +265,7 @@ async function app() {
           name: 'time',
         },
         !Boolean(argv.note) && { type: 'input', message: 'Note', name: 'note' },
-      ].filter(Boolean),
+      ].filter(Boolean)
     );
 
     await createTimeEntry(time, note, today, config.userId, pick, headers);
