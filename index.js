@@ -171,7 +171,6 @@ async function getConfig() {
 }
 
 async function showStats(headers, userId, today) {
-  // console.log('Worked:', '10 hours');
   const entires = await get(
     `time_entries?filter[person_id]=${userId}&filter[before]=${today}&filter[after]=${today}`,
     headers
