@@ -13,20 +13,21 @@ new services run `productive-cli config`. It's possible to edit the config file 
 hand if you can't find the service with the tool - `~/.productivecli`.
 
 ```
-Usage: productive-cli <command> [options]
+Usage: index.js <command> [options]
 
 Commands:
-  productive-cli init    Init the cli
-  productive-cli config  Add new services
-  productive-cli clock   Create a new entry
-  productive-cli stats   Show stats
+  index.js init    Init the cli
+  index.js config  Add new services
+  index.js clock   Create a new entry
+  index.js timer   Start a timer
+  index.js stats   Show stats
 
 Options:
-  --version      Show version number                                   [boolean]
+  --version      Show version number                                 [boolean]
   -s, --service  Service
   -t, --time     Time in minutes
   -n, --note     Note
-  -h, --help     Show help                                             [boolean]
+  -h, --help     Show help                                           [boolean]
 ```
 
 ## License
