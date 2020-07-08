@@ -11,6 +11,7 @@ const argv = require('yargs')
   .command('init', 'Init the cli')
   .command('config', 'Add new services')
   .command('clock', 'Create a new entry')
+  .command('timer', 'Start a timer')
   .command('stats', 'Show stats')
   .alias('s', 'service')
   .nargs('s', 1)
@@ -40,6 +41,15 @@ async function get(path, headers) {
 async function post(path, data, headers) {
   const res = await fetch(`https://api.productive.io/api/v2/${path}`, {
     method: 'POST',
+    body: JSON.stringify(data),
+    headers,
+  });
+  return await res.json();
+}
+
+async function patch(path, data, headers) {
+  const res = await fetch(`https://api.productive.io/api/v2/${path}`, {
+    method: 'PATCH',
     body: JSON.stringify(data),
     headers,
   });
@@ -119,6 +129,14 @@ async function createTimeEntry(time, note, today, userId, serviceId, headers) {
   );
 }
 
+async function startTimer(entryId, headers) {
+  return patch(`time_entries/${entryId}/start`, {}, headers);
+}
+
+async function stopTimer(entryId, headers) {
+  return patch(`time_entries/${entryId}/stop`, {}, headers);
+}
+
 async function createNewProjectEntry(today, headers) {
   const { query } = await inquirer.prompt([
     { type: 'input', message: 'Project name', name: 'query' },
@@ -168,6 +186,19 @@ async function getConfig() {
   } catch (e) {
     return null;
   }
+}
+
+async function getRunningTimer(headers, userId, today) {
+  const entires = await get(
+    `time_entries?filter[person_id]=${userId}&filter[before]=${today}&filter[after]=${today}`,
+    headers
+  );
+
+  if (!entires.data.length) {
+    return;
+  }
+
+  return entires.data.find((entry) => Boolean(entry.attributes.timer_started_at));
 }
 
 async function showStats(headers, userId, today) {
@@ -222,6 +253,46 @@ async function app() {
     };
 
     await writeFile(CONFIG_PATH, JSON.stringify(newConfig));
+  }
+
+  if (argv['_'][0] === 'timer') {
+    const timer = await getRunningTimer(headers, config.userId, today);
+    if (timer) {
+      const { shouldStop } = await inquirer.prompt([
+        {
+          type: 'confirm',
+          message: 'There is at timer alreay running. Would you like to stop it?',
+          name: 'shouldStop',
+        },
+      ]);
+
+      if (shouldStop) {
+        await stopTimer(timer.id, headers);
+      } else {
+        return;
+      }
+    }
+
+    const { pick, note } = await inquirer.prompt([
+      {
+        type: 'list',
+        message: 'Start a timer for',
+        name: 'pick',
+        choices: [
+          ...config.services.map((s) => ({
+            value: s.serviceId,
+            name: `${s.dealName} - ${s.serviceName}`,
+          })),
+        ],
+      },
+      { type: 'input', message: 'Note', name: 'note' },
+    ]);
+
+    const entry = await createTimeEntry(0, note, today, config.userId, pick, headers);
+    const entryId = entry.data.id;
+
+    await startTimer(entryId, headers);
+    return;
   }
 
   if (argv['_'][0] === 'clock') {
