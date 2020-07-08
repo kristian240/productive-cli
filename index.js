@@ -70,25 +70,7 @@ async function clockFood(headers, config, today) {
   const userId = config.userId;
   const serviceId = matchingService.data[0].id;
 
-  await post(
-    'time_entries',
-    {
-      data: {
-        attributes: {
-          date: today,
-          time: 30,
-          billable_time: 30,
-          note: '',
-        },
-        relationships: {
-          person: { data: { type: 'people', id: userId } },
-          service: { data: { type: 'services', id: serviceId } },
-        },
-        type: 'time-entries',
-      },
-    },
-    headers
-  );
+  await createTimeEntry(30, '', today, userId, serviceId, headers);
 }
 
 async function findDeal(search, headers, today) {
@@ -139,7 +121,7 @@ async function stopTimer(entryId, headers) {
 
 async function createNewProjectEntry(today, headers) {
   const { query } = await inquirer.prompt([
-    { type: 'input', message: 'Project name', name: 'query' },
+    { type: 'input', message: 'Search for a project by name', name: 'query' },
   ]);
   const deals = await findDeal(query, headers, today);
 
