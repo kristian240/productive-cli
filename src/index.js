@@ -1,7 +1,5 @@
-#!/usr/bin/env node
-
 const homedir = require('os').homedir();
-const format = require('date-fns/format');
+const { format } = require('date-fns');
 const inquirer = require('inquirer');
 
 const Timer = require('./timer');
@@ -26,7 +24,7 @@ const CONFIG_PATH = `${homedir}/.productivecli`;
   };
 
   const argv = require('yargs')
-    .usage('Usage: productive-cli <command> [options]')
+    .usage('Usage: $0 <command> [options]')
     .command('init', 'Init the cli')
     .command('config', 'Add new services', async () => {
       await Config.createNewProjectEntry(today, headers, CONFIG_PATH, config);

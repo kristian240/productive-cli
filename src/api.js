@@ -1,4 +1,4 @@
-const fetch = require('node-fetch');
+const fetch = require('node-fetch').default;
 
 async function get(path, headers) {
   const res = await fetch(`https://api.productive.io/api/v2/${path}`, {

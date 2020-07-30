@@ -1,23 +1,23 @@
 {
   "name": "productive-cli",
-  "version": "1.1.0",
-  "description": "",
-  "main": "index.js",
+  "version": "1.2.0",
+  "description": "The missing and working Productive.io clocking CLI",
+  "main": "src/index.js",
   "scripts": {
-    "start": "nodemon src/index.js"
+    "build": "webpack-cli"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Andrei Zvonimir Crnkovic <andreicek@hey.com>",
+  "license": "MIT",
   "devDependencies": {
-    "nodemon": "^2.0.4"
-  },
-  "bin": {
-    "productive-cli": "src/index.js"
-  },
-  "dependencies": {
-    "date-fns": "^2.14.0",
+    "webpack": "^4.44.1",
+    "webpack-cli": "^3.3.12",
+    "date-fns": "^2.15.0",
     "inquirer": "^7.3.0",
     "node-fetch": "^2.6.0",
     "yargs": "^15.4.0"
-  }
+  },
+  "bin": {
+    "productive-cli": "build/cli.js"
+  },
+  "dependencies": {}
 }
