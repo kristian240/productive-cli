@@ -1,6 +1,6 @@
 {
   "name": "productive-cli",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "The missing and working Productive.io clocking CLI",
   "main": "src/index.js",
   "scripts": {
@@ -17,7 +17,7 @@
     "yargs": "^15.4.0"
   },
   "bin": {
-    "productive-cli": "build/cli.js"
+    "productive-cli": "build/productive-cli"
   },
   "dependencies": {}
 }
