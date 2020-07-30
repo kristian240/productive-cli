@@ -1,0 +1,114 @@
+const fs = require('fs');
+const { get } = require('./api');
+const { promisify } = require('util');
+const inquirer = require('inquirer');
+
+const readFile = promisify(fs.readFile);
+const writeFile = promisify(fs.writeFile);
+
+async function findDeal(search, headers, today) {
+  const matchingDeal = await get(
+    `deals?filter[query]=${search}&filter[date][lt_eq]=${today}&filter[end_date][gt_eq]=${today}`,
+    headers
+  );
+  return matchingDeal.data.map((d) => ({
+    value: d.id,
+    name: `${d.attributes.name} ${d.attributes.date}`,
+  }));
+}
+
+async function findService(dealId, headers) {
+  const matchingService = await get(`services?filter[deal_id]=${dealId}`, headers);
+  return matchingService.data.map((d) => ({ value: d.id, name: d.attributes.name }));
+}
+
+async function createConfig() {
+  const { token } = await inquirer.prompt([
+    { type: 'input', message: 'Productive.io token', name: 'token' },
+  ]);
+
+  const org = await get('organization_memberships', {
+    'Content-Type': 'application/vnd.api+json',
+    'X-Auth-Token': token,
+  });
+
+  return {
+    token,
+    orgId: org.data[0].relationships.organization.data.id,
+    userId: org.data[0].relationships.person.data.id,
+    services: [],
+  };
+}
+
+async function getConfig(configPath) {
+  try {
+    const file = await readFile(configPath, { encoding: 'utf-8' });
+    const config = JSON.parse(file);
+
+    return config;
+  } catch (e) {
+    return null;
+  }
+}
+
+async function createNewProjectEntry(today, headers, configPath, config) {
+  const { query } = await inquirer.prompt([
+    { type: 'input', message: 'Search for a project by name', name: 'query' },
+  ]);
+  const deals = await findDeal(query, headers, today);
+
+  const { dealId } = await inquirer.prompt([
+    { type: 'list', message: 'Select a project', name: 'dealId', choices: deals },
+  ]);
+
+  const services = await findService(dealId, headers);
+  const { serviceId } = await inquirer.prompt([
+    { type: 'list', message: 'Select a service', name: 'serviceId', choices: services },
+  ]);
+
+  const newConfig = {
+    ...config,
+    services: [
+      ...(config.services || []),
+      {
+        serviceId: serviceId,
+        serviceName: services.find((s) => s.value === serviceId).name,
+        dealName: deals.find((d) => d.value === dealId).name,
+      },
+    ],
+  };
+
+  await writeFile(configPath, JSON.stringify(newConfig));
+}
+
+async function showStats(headers, userId, today) {
+  const entires = await get(
+    `time_entries?filter[person_id]=${userId}&filter[before]=${today}&filter[after]=${today}`,
+    headers
+  );
+
+  if (!entires.data.length) {
+    return;
+  }
+
+  const totalMinutes = entires.data.map((e) => e.attributes.time).reduce((prev, acc) => prev + acc);
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+
+  console.log('Worked:', hours || 0, 'h', minutes || 0, 'min');
+}
+
+async function initConfig(configPath) {
+  const initConfig = await createConfig();
+  await writeFile(configPath, JSON.stringify(initConfig));
+}
+
+module.exports = {
+  findDeal,
+  findService,
+  createConfig,
+  getConfig,
+  createNewProjectEntry,
+  showStats,
+  initConfig,
+};

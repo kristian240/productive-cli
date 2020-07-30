@@ -1,10 +1,10 @@
 {
   "name": "productive-cli",
-  "version": "1.0.6",
+  "version": "1.1.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon index.js"
+    "start": "nodemon src/index.js"
   },
   "author": "",
   "license": "ISC",
@@ -12,7 +12,7 @@
     "nodemon": "^2.0.4"
   },
   "bin": {
-    "productive-cli": "index.js"
+    "productive-cli": "src/index.js"
   },
   "dependencies": {
     "date-fns": "^2.14.0",
