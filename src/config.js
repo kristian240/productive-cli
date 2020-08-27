@@ -3,8 +3,7 @@ const { get, fetchRemotePacakge } = require('./api');
 const { promisify } = require('util');
 const inquirer = require('inquirer');
 const boxen = require('boxen');
-const fetch = require('node-fetch').default;
-const package = require('../package.json');
+const packageJson = require('../package.json');
 
 const readFile = promisify(fs.readFile);
 const writeFile = promisify(fs.writeFile);
@@ -92,7 +91,7 @@ async function initConfig(configPath) {
 async function detectNewVersion() {
   const remote = await fetchRemotePacakge();
 
-  if (remote.version === package.version) {
+  if (remote.version === packageJson.version) {
     return;
   }
 
