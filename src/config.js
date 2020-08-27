@@ -3,7 +3,7 @@ const { get } = require('./api');
 const { promisify } = require('util');
 const inquirer = require('inquirer');
 const boxen = require('boxen');
-const fetch = require('node-fetch');
+const fetch = require('node-fetch').default;
 const package = require('../package.json');
 
 const readFile = promisify(fs.readFile);
