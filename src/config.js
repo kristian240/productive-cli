@@ -1,5 +1,5 @@
 const fs = require('fs');
-const { get } = require('./api');
+const { get, fetchRemotePacakge } = require('./api');
 const { promisify } = require('util');
 const inquirer = require('inquirer');
 const boxen = require('boxen');
@@ -90,11 +90,7 @@ async function initConfig(configPath) {
 }
 
 async function detectNewVersion() {
-  const remote = await (
-    fetch('https://raw.githubusercontent.com/andreicek/productive-cli/master/package.json')
-      .then((res) => res.text())
-      .then((data) => JSON.parse(data))
-  );
+  const remote = await fetchRemotePacakge();
 
   if (remote.version === package.version) {
     return;
