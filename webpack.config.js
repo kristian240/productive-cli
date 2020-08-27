@@ -1,5 +1,6 @@
 const Path = require('path');
 const webpack = require('webpack');
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 
 module.exports = {
   mode: 'production',
@@ -13,6 +14,6 @@ module.exports = {
   plugins: [new webpack.BannerPlugin({ banner: '#!/usr/bin/env node', raw: true })],
   target: 'node',
   optimization: {
-    minimize: true,
+    minimizer: [new UglifyJsPlugin()],
   },
 };

@@ -1,6 +1,6 @@
 {
   "name": "productive-cli",
-  "version": "1.4.2",
+  "version": "1.4.3",
   "description": "The missing and working Productive.io clocking CLI",
   "main": "src/index.js",
   "scripts": {
@@ -9,17 +9,16 @@
   "author": "Andrei Zvonimir Crnkovic <andreicek@hey.com>",
   "license": "MIT",
   "devDependencies": {
-    "webpack": "^4.44.1",
-    "webpack-cli": "^3.3.12",
     "date-fns": "^2.15.0",
     "inquirer": "^7.3.0",
     "node-fetch": "^2.6.0",
-    "yargs": "^15.4.0"
+    "uglifyjs-webpack-plugin": "^2.2.0",
+    "webpack": "^4.44.1",
+    "webpack-cli": "^3.3.12",
+    "yargs": "^15.4.0",
+    "boxen": "^4.2.0"
   },
   "bin": {
     "productive-cli": "build/productive-cli"
-  },
-  "dependencies": {
-    "boxen": "^4.2.0"
   }
 }
