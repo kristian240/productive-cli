@@ -81,23 +81,6 @@ async function createNewProjectEntry(today, headers, configPath, config) {
   await writeFile(configPath, JSON.stringify(newConfig));
 }
 
-async function showStats(headers, userId, today) {
-  const entires = await get(
-    `time_entries?filter[person_id]=${userId}&filter[before]=${today}&filter[after]=${today}`,
-    headers
-  );
-
-  if (!entires.data.length) {
-    return;
-  }
-
-  const totalMinutes = entires.data.map((e) => e.attributes.time).reduce((prev, acc) => prev + acc);
-  const hours = Math.floor(totalMinutes / 60);
-  const minutes = totalMinutes % 60;
-
-  console.log('Worked:', hours || 0, 'h', minutes || 0, 'min');
-}
-
 async function initConfig(configPath) {
   const initConfig = await createConfig();
   await writeFile(configPath, JSON.stringify(initConfig));
@@ -109,6 +92,5 @@ module.exports = {
   createConfig,
   getConfig,
   createNewProjectEntry,
-  showStats,
   initConfig,
 };

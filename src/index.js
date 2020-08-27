@@ -5,6 +5,7 @@ const inquirer = require('inquirer');
 const Timer = require('./timer');
 const TimeEntry = require('./time-entry');
 const Config = require('./config');
+const Overtime = require('./overtime');
 
 const CONFIG_PATH = `${homedir}/.productivecli`;
 
@@ -64,7 +65,7 @@ const CONFIG_PATH = `${homedir}/.productivecli`;
             ]);
 
       if (pick === 'food') {
-        await TimeEntry.clockFood(headers, config, today);
+        await TimeEntry.clockFood(headers, config, argv.date || today);
         return;
       }
 
@@ -120,7 +121,10 @@ const CONFIG_PATH = `${homedir}/.productivecli`;
       await Timer.startTimer(entryId, headers);
     })
     .command('stats', 'Show stats', async ({ argv }) => {
-      await Config.showStats(headers, config.userId, argv.date || today);
+      await Overtime.showStats(headers, config.userId, argv.date || today);
+    })
+    .command('overtime', 'Show overtime for this month (does not include today)', async ({argv}) => {
+      await Overtime.showOvertime(headers, config.userId, argv.date || today);
     })
     .demandCommand(1)
     .alias('s', 'service')
