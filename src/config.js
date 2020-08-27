@@ -26,13 +26,18 @@ async function findService(dealId, headers) {
 
 async function createConfig() {
   const { token } = await inquirer.prompt([
-    { type: 'input', message: 'Productive.io token', name: 'token' },
+    { type: 'input', message: 'Productive.io token', name: 'token', type: 'password' },
   ]);
 
   const org = await get('organization_memberships', {
     'Content-Type': 'application/vnd.api+json',
     'X-Auth-Token': token,
   });
+
+  if (!org.data) {
+    console.log('Something went wrong... Check your token!');
+    return;
+  }
 
   return {
     token,
@@ -84,8 +89,12 @@ async function createNewProjectEntry(today, headers, configPath, config) {
 }
 
 async function initConfig(configPath) {
-  const initConfig = await createConfig();
-  await writeFile(configPath, JSON.stringify(initConfig));
+  try {
+    const initConfig = await createConfig();
+    await writeFile(configPath, JSON.stringify(initConfig));
+  } catch (e) {
+    return null;
+  }
 }
 
 async function detectNewVersion() {

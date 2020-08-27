@@ -1,6 +1,6 @@
 {
   "name": "productive-cli",
-  "version": "1.4.9",
+  "version": "1.4.10",
   "description": "The missing and working Productive.io clocking CLI",
   "main": "src/index.js",
   "scripts": {

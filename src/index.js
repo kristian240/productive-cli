@@ -1,6 +1,7 @@
 const homedir = require('os').homedir();
 const { format } = require('date-fns');
 const inquirer = require('inquirer');
+const boxen = require('boxen');
 
 const Timer = require('./timer');
 const TimeEntry = require('./time-entry');
@@ -15,7 +16,13 @@ const CONFIG_PATH = `${homedir}/.productivecli`;
 
   const config = await Config.getConfig(CONFIG_PATH);
   if (!config) {
-    console.log('Run productive-cli init first!');
+    let text = 'This is your first run, let\'s first configure it!\n';
+    text += 'You can find your token here:\nhttps://app.productive.io/1-infinum/settings/security';
+    console.log(boxen(text, { padding: 1 }));
+
+    await Config.initConfig(CONFIG_PATH);
+
+    console.log('Awesome! Now run productive-cli config to get started!');
     return;
   }
 
@@ -27,7 +34,6 @@ const CONFIG_PATH = `${homedir}/.productivecli`;
 
   const argv = require('yargs')
     .usage('Usage: $0 <command> [options]')
-    .command('init', 'Init the cli')
     .command('config', 'Add new services', async () => {
       await Config.createNewProjectEntry(today, headers, CONFIG_PATH, config);
     })
