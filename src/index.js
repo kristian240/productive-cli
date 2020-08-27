@@ -10,6 +10,7 @@ const Overtime = require('./overtime');
 const CONFIG_PATH = `${homedir}/.productivecli`;
 
 (async () => {
+  await Config.detectNewVersion();
   const today = format(new Date(), 'yyyy-MM-dd');
 
   const config = await Config.getConfig(CONFIG_PATH);

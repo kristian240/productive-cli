@@ -2,6 +2,9 @@ const fs = require('fs');
 const { get } = require('./api');
 const { promisify } = require('util');
 const inquirer = require('inquirer');
+const boxen = require('boxen');
+const fetch = require('node-fetch');
+const package = require('../package.json');
 
 const readFile = promisify(fs.readFile);
 const writeFile = promisify(fs.writeFile);
@@ -86,7 +89,24 @@ async function initConfig(configPath) {
   await writeFile(configPath, JSON.stringify(initConfig));
 }
 
+async function detectNewVersion() {
+  const remote = await (
+    fetch('https://raw.githubusercontent.com/andreicek/productive-cli/master/package.json')
+      .then((res) => res.text())
+      .then((data) => JSON.parse(data))
+  );
+
+  if (remote.version === package.version) {
+    return;
+  }
+
+  let alert = `New version \x1b[31m${remote.version}\x1b[0m is out!\n`
+  alert += 'Run \x1b[33mnpm install -g andreicek/productive-cli\x1b[0m';
+  console.log(boxen(alert, { padding: 1}));
+}
+
 module.exports = {
+  detectNewVersion,
   findDeal,
   findService,
   createConfig,
