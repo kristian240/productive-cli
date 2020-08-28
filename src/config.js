@@ -1,9 +1,10 @@
 const fs = require('fs');
-const { get, fetchRemotePacakge } = require('./api');
+const { get, fetchRemotePacakge, post } = require('./api');
 const { promisify } = require('util');
 const inquirer = require('inquirer');
 const boxen = require('boxen');
 const packageJson = require('../package.json');
+const { createSession } = require('./session');
 
 const readFile = promisify(fs.readFile);
 const writeFile = promisify(fs.writeFile);
@@ -25,24 +26,25 @@ async function findService(dealId, headers) {
 }
 
 async function createConfig() {
-  const { token } = await inquirer.prompt([
-    { type: 'input', message: 'Productive.io token', name: 'token', type: 'password' },
-  ]);
+  const session = await createSession();
+
+  if (!session) {
+    console.log('Something went wrong... Check your login credentials!');
+    return;
+  }
+
+  const token = session.data.attributes.token;
 
   const org = await get('organization_memberships', {
     'Content-Type': 'application/vnd.api+json',
     'X-Auth-Token': token,
   });
 
-  if (!org.data) {
-    console.log('Something went wrong... Check your token!');
-    return;
-  }
-
   return {
     token,
+    sessionId: session.data.id,
     orgId: org.data[0].relationships.organization.data.id,
-    userId: org.data[0].relationships.person.data.id,
+    personId: org.data[0].relationships.person.data.id,
     services: [],
   };
 }
@@ -104,9 +106,9 @@ async function detectNewVersion() {
     return;
   }
 
-  let alert = `New version \x1b[31m${remote.version}\x1b[0m is out!\n`
+  let alert = `New version \x1b[31m${remote.version}\x1b[0m is out!\n`;
   alert += 'Run \x1b[33mnpm install -g andreicek/productive-cli\x1b[0m';
-  console.log(boxen(alert, { padding: 1}));
+  console.log(boxen(alert, { padding: 1 }));
 }
 
 module.exports = {

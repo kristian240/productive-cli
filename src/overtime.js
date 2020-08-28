@@ -1,8 +1,8 @@
 const { get } = require('./api');
 
-async function showStats(headers, userId, today) {
+async function showStats(headers, personId, today) {
   const entires = await get(
-    `time_entries?filter[person_id]=${userId}&filter[before]=${today}&filter[after]=${today}`,
+    `time_entries?filter[person_id]=${personId}&filter[before]=${today}&filter[after]=${today}`,
     headers
   );
 
@@ -18,15 +18,15 @@ async function showStats(headers, userId, today) {
   console.log('Worked:', hours || 0, 'h', minutes || 0, 'min');
 }
 
-async function showOvertime(headers, userId, today) {
+async function showOvertime(headers, personId, today) {
   const [year, month, day] = today.split('-');
   const startDate = `${year}-${month}-01`;
   const yesterday = day - 1 <= 0 ? 1 : day - 1;
   const endDate = `${year}-${month}-${yesterday}`;
 
   const { data: [report] = [] } = await get(
-    `time_reports?filter[person_id]=${userId}&filter[before]=${endDate}&filter[after]=${startDate}`,
-    headers,
+    `time_reports?filter[person_id]=${personId}&filter[before]=${endDate}&filter[after]=${startDate}`,
+    headers
   );
 
   if (!report) {
