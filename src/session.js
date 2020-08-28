@@ -1,7 +1,7 @@
 const inquirer = require('inquirer');
 const { post, put } = require('./api');
 
-async function createSession() {
+async function create() {
   const { email, password } = await inquirer.prompt([
     { message: 'Productive.io email', name: 'email', type: 'text' },
     { message: 'Productive.io password', name: 'password', type: 'password' },
@@ -14,6 +14,8 @@ async function createSession() {
   );
 
   if (!session.data) {
+    console.log('Something went wrong... Check your login credentials!');
+    s;
     return null;
   }
 
@@ -37,11 +39,12 @@ async function createSession() {
     );
 
     if (!sessionWith2FA.data) {
+      console.log('Something went wrong... Check your login credentials!');
       return null;
     }
   }
 
-  return session;
+  return { token: session.data.attributes.token, sessionId: session.data.id };
 }
 
-module.exports = { createSession };
+module.exports = { create };

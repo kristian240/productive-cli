@@ -4,7 +4,7 @@ const { promisify } = require('util');
 const inquirer = require('inquirer');
 const boxen = require('boxen');
 const packageJson = require('../package.json');
-const { createSession } = require('./session');
+const Session = require('./session');
 
 const readFile = promisify(fs.readFile);
 const writeFile = promisify(fs.writeFile);
@@ -26,14 +26,13 @@ async function findService(dealId, headers) {
 }
 
 async function createConfig() {
-  const session = await createSession();
+  const session = await Session.create();
 
   if (!session) {
-    console.log('Something went wrong... Check your login credentials!');
     return;
   }
 
-  const token = session.data.attributes.token;
+  const { token, sessionId } = session;
 
   const org = await get('organization_memberships', {
     'Content-Type': 'application/vnd.api+json',
@@ -42,7 +41,7 @@ async function createConfig() {
 
   return {
     token,
-    sessionId: session.data.id,
+    sessionId,
     orgId: org.data[0].relationships.organization.data.id,
     userId: org.data[0].relationships.person.data.id,
     services: [],
