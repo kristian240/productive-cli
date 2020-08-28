@@ -16,7 +16,7 @@ class Config {
     );
 
     return matchingDeal.data.map((d) => ({
-      value: d.id,
+      value: { dealId: d.id, projectId: d.relationships.project.data.id },
       name: `${d.attributes.name} ${d.attributes.date}`,
     }));
   }
@@ -77,11 +77,13 @@ class Config {
     ]);
     const deals = await Config.findDeal(query, headers, today);
 
-    const { dealId } = await inquirer.prompt([
+    const {
+      deal: { dealId, projectId },
+    } = await inquirer.prompt([
       {
         type: 'list',
         message: 'Select a project',
-        name: 'dealId',
+        name: 'deal',
         choices: deals,
       },
     ]);
@@ -104,6 +106,7 @@ class Config {
           serviceId,
           serviceName: services.find((s) => s.value === serviceId).name,
           dealName: deals.find((d) => d.value === dealId).name,
+          projectId,
         },
       ],
     };
