@@ -1,7 +1,6 @@
 const homedir = require('os').homedir();
 const { format } = require('date-fns');
 const inquirer = require('inquirer');
-const boxen = require('boxen');
 
 const Timer = require('./timer');
 const TimeEntry = require('./time-entry');
@@ -33,7 +32,8 @@ const CONFIG_PATH = `${homedir}/.productivecli`;
     'X-Organization-Id': config.orgId,
   };
 
-  const argv = require('yargs')
+  // eslint-disable-next-line no-unused-expressions
+  require('yargs')
     .usage('Usage: $0 <command> [options]')
     .command('config', 'Add new services', async () => {
       await Config.createNewProjectEntry(today, headers, CONFIG_PATH, config);
@@ -41,7 +41,7 @@ const CONFIG_PATH = `${homedir}/.productivecli`;
     .command('clock', 'Create a new entry', async ({ argv }) => {
       // user told us everything
       if (typeof argv.service !== 'undefined' && argv.time) {
-        const serviceId = config.services[argv.service].serviceId;
+        const { serviceId } = config.services[argv.service];
         await TimeEntry.createTimeEntry(
           argv.time,
           argv.note || '',
@@ -54,23 +54,24 @@ const CONFIG_PATH = `${homedir}/.productivecli`;
       }
 
       // user told us only the service
-      const { pick } =
-        typeof argv.service !== 'undefined'
-          ? { pick: argv.service === 'food' ? 'food' : config.services[argv.service].serviceId }
-          : await inquirer.prompt([
+      const { pick } = typeof argv.service !== 'undefined'
+        ? { pick: argv.service === 'food' ? 'food' : config.services[argv.service].serviceId }
+        : await inquirer.prompt([
+          {
+            type: 'list',
+            message: 'Pick an option',
+            name: 'pick',
+            choices: [
+              ...config.services.map((s) => ({
+                value: s.serviceId,
+                name: `Clock on: ${s.dealName} - ${s.serviceName}`,
+              })),
               {
-                type: 'list',
-                message: 'Pick an option',
-                name: 'pick',
-                choices: [
-                  ...config.services.map((s) => ({
-                    value: s.serviceId,
-                    name: `Clock on: ${s.dealName} - ${s.serviceName}`,
-                  })),
-                  { value: 'food', name: 'Clock 30mins at food' },
-                ],
+                value: 'food', name: 'Clock 30mins at food',
               },
-            ]);
+            ],
+          },
+        ]);
 
       if (pick === 'food') {
         await TimeEntry.clockFood(headers, config, argv.date || today);
@@ -79,12 +80,14 @@ const CONFIG_PATH = `${homedir}/.productivecli`;
 
       const { time = argv.time, note = argv.note } = await inquirer.prompt(
         [
-          !Boolean(argv.time) && {
+          !argv.time && {
             type: 'input',
             message: 'Number of minutes to clock',
             name: 'time',
           },
-          !Boolean(argv.note) && { type: 'input', message: 'Note', name: 'note' },
+          !argv.note && {
+            type: 'input', message: 'Note', name: 'note',
+          },
         ].filter(Boolean)
       );
 
@@ -120,7 +123,9 @@ const CONFIG_PATH = `${homedir}/.productivecli`;
             })),
           ],
         },
-        { type: 'input', message: 'Note', name: 'note' },
+        {
+          type: 'input', message: 'Note', name: 'note',
+        },
       ]);
 
       const entry = await TimeEntry.createTimeEntry(0, note, today, config.userId, pick, headers);
@@ -131,7 +136,7 @@ const CONFIG_PATH = `${homedir}/.productivecli`;
     .command('stats', 'Show stats', async ({ argv }) => {
       await Reports.showStats(headers, config.userId, argv.date || today);
     })
-    .command('overtime', 'Show overtime for this month (does not include today)', async ({argv}) => {
+    .command('overtime', 'Show overtime for this month (does not include today)', async ({ argv }) => {
       await Reports.showOvertime(headers, config.userId, argv.date || today);
     })
     .demandCommand(1)

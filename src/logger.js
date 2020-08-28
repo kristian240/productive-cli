@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 const boxen = require('boxen');
 
 class Logger {

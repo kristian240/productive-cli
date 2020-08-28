@@ -6,7 +6,7 @@ class Api {
       method: 'GET',
       headers,
     });
-    return await res.json();
+    return res.json();
   }
 
   static async post(path, data, headers) {
@@ -15,7 +15,7 @@ class Api {
       body: JSON.stringify(data),
       headers,
     });
-    return await res.json();
+    return res.json();
   }
 
   static async patch(path, data, headers) {
@@ -24,12 +24,12 @@ class Api {
       body: JSON.stringify(data),
       headers,
     });
-    return await res.json();
+    return res.json();
   }
 
-  static async fetchRemotePacakge(path, data, headers) {
+  static async fetchRemotePacakge() {
     const res = await fetch('https://raw.githubusercontent.com/andreicek/productive-cli/master/package.json');
-    return await res.json();
+    return res.json();
   }
 }
 

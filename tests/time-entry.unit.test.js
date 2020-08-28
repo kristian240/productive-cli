@@ -22,9 +22,9 @@ describe('Time entry service: create time entry', () => {
         data: {
           attributes: {
             billable_time: time,
-            date: date,
-            note: note,
-            time: time,
+            date,
+            note,
+            time,
           },
           relationships: {
             person: {

@@ -5,13 +5,17 @@
   "main": "src/index.js",
   "scripts": {
     "build": "webpack-cli",
-    "test": "jest"
+    "test": "jest",
+    "lint": "eslint src/* tests/*"
   },
   "author": "Andrei Zvonimir Crnkovic <andreicek@hey.com>",
   "license": "MIT",
   "devDependencies": {
     "boxen": "^4.2.0",
     "date-fns": "^2.15.0",
+    "eslint": "^7.7.0",
+    "eslint-config-airbnb-base": "^14.2.0",
+    "eslint-plugin-import": "^2.22.0",
     "inquirer": "^7.3.0",
     "jest": "^26.4.2",
     "json-loader": "^0.5.7",
