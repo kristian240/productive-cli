@@ -44,7 +44,7 @@ const CONFIG_PATH = `${homedir}/.productivecli`;
           argv.time,
           argv.note || '',
           today,
-          config.personId,
+          config.userId,
           serviceId,
           headers
         );
@@ -86,17 +86,10 @@ const CONFIG_PATH = `${homedir}/.productivecli`;
         ].filter(Boolean)
       );
 
-      await TimeEntry.createTimeEntry(
-        time,
-        note,
-        argv.date || today,
-        config.personId,
-        pick,
-        headers
-      );
+      await TimeEntry.createTimeEntry(time, note, argv.date || today, config.userId, pick, headers);
     })
     .command('timer', 'Start a timer', async () => {
-      const timer = await Timer.getRunningTimer(headers, config.personId, today);
+      const timer = await Timer.getRunningTimer(headers, config.userId, today);
       if (timer) {
         const { shouldStop } = await inquirer.prompt([
           {
@@ -128,19 +121,19 @@ const CONFIG_PATH = `${homedir}/.productivecli`;
         { type: 'input', message: 'Note', name: 'note' },
       ]);
 
-      const entry = await TimeEntry.createTimeEntry(0, note, today, config.personId, pick, headers);
+      const entry = await TimeEntry.createTimeEntry(0, note, today, config.userId, pick, headers);
       const entryId = entry.data.id;
 
       await Timer.startTimer(entryId, headers);
     })
     .command('stats', 'Show stats', async ({ argv }) => {
-      await Overtime.showStats(headers, config.personId, argv.date || today);
+      await Overtime.showStats(headers, config.userId, argv.date || today);
     })
     .command(
       'overtime',
       'Show overtime for this month (does not include today)',
       async ({ argv }) => {
-        await Overtime.showOvertime(headers, config.personId, argv.date || today);
+        await Overtime.showOvertime(headers, config.userId, argv.date || today);
       }
     )
     .demandCommand(1)

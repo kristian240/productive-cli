@@ -8,9 +8,9 @@ async function stopTimer(entryId, headers) {
   return patch(`time_entries/${entryId}/stop`, {}, headers);
 }
 
-async function getRunningTimer(headers, personId, today) {
+async function getRunningTimer(headers, userId, today) {
   const entires = await get(
-    `time_entries?filter[person_id]=${personId}&filter[before]=${today}&filter[after]=${today}`,
+    `time_entries?filter[person_id]=${userId}&filter[before]=${today}&filter[after]=${today}`,
     headers
   );
 

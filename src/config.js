@@ -44,7 +44,7 @@ async function createConfig() {
     token,
     sessionId: session.data.id,
     orgId: org.data[0].relationships.organization.data.id,
-    personId: org.data[0].relationships.person.data.id,
+    userId: org.data[0].relationships.person.data.id,
     services: [],
   };
 }
