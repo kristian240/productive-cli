@@ -6,7 +6,8 @@ const boxen = require('boxen');
 const Timer = require('./timer');
 const TimeEntry = require('./time-entry');
 const Config = require('./config');
-const Overtime = require('./overtime');
+const Reports = require('./reports');
+const Logger = require('./logger');
 
 const CONFIG_PATH = `${homedir}/.productivecli`;
 
@@ -18,11 +19,11 @@ const CONFIG_PATH = `${homedir}/.productivecli`;
   if (!config) {
     let text = 'This is your first run, let\'s first configure it!\n';
     text += 'You can find your token here:\nhttps://app.productive.io/1-infinum/settings/security';
-    console.log(boxen(text, { padding: 1 }));
+    Logger.BoxPrint(text);
 
     await Config.initConfig(CONFIG_PATH);
 
-    console.log('Awesome! Now run productive-cli config to get started!');
+    Logger.Log('Awesome! Now run productive-cli config to get started!');
     return;
   }
 
@@ -128,10 +129,10 @@ const CONFIG_PATH = `${homedir}/.productivecli`;
       await Timer.startTimer(entryId, headers);
     })
     .command('stats', 'Show stats', async ({ argv }) => {
-      await Overtime.showStats(headers, config.userId, argv.date || today);
+      await Reports.showStats(headers, config.userId, argv.date || today);
     })
     .command('overtime', 'Show overtime for this month (does not include today)', async ({argv}) => {
-      await Overtime.showOvertime(headers, config.userId, argv.date || today);
+      await Reports.showOvertime(headers, config.userId, argv.date || today);
     })
     .demandCommand(1)
     .alias('s', 'service')

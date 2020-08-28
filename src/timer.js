@@ -1,28 +1,26 @@
-const { get, patch } = require('./api');
+const Api = require('./api');
 
-async function startTimer(entryId, headers) {
-  return patch(`time_entries/${entryId}/start`, {}, headers);
-}
-
-async function stopTimer(entryId, headers) {
-  return patch(`time_entries/${entryId}/stop`, {}, headers);
-}
-
-async function getRunningTimer(headers, userId, today) {
-  const entires = await get(
-    `time_entries?filter[person_id]=${userId}&filter[before]=${today}&filter[after]=${today}`,
-    headers
-  );
-
-  if (!entires.data.length) {
-    return;
+class Timer {
+  static async startTimer(entryId, headers) {
+    return Api.patch(`time_entries/${entryId}/start`, {}, headers);
+  }
+  
+  static async stopTimer(entryId, headers) {
+    return Api.patch(`time_entries/${entryId}/stop`, {}, headers);
   }
 
-  return entires.data.find((entry) => Boolean(entry.attributes.timer_started_at));
+  static async getRunningTimer(headers, userId, today) {
+    const entires = await Api.get(
+      `time_entries?filter[person_id]=${userId}&filter[before]=${today}&filter[after]=${today}`,
+      headers
+    );
+  
+    if (!entires.data.length) {
+      return;
+    }
+  
+    return entires.data.find((entry) => Boolean(entry.attributes.timer_started_at));
+  }
 }
 
-module.exports = {
-  startTimer,
-  stopTimer,
-  getRunningTimer,
-};
+module.exports = Timer;

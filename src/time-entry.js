@@ -1,45 +1,44 @@
-const { get, post } = require('./api');
+const Api = require('./api');
 
-async function createTimeEntry(time, note, today, userId, serviceId, headers) {
-  return post(
-    'time_entries',
-    {
-      data: {
-        attributes: {
-          date: today,
-          time: time,
-          billable_time: time,
-          note: note,
+class TimeEntry {
+  static async createTimeEntry(time, note, today, userId, serviceId, headers) {
+    return Api.post(
+      'time_entries',
+      {
+        data: {
+          attributes: {
+            date: today,
+            time: time,
+            billable_time: time,
+            note: note,
+          },
+          relationships: {
+            person: { data: { type: 'people', id: userId } },
+            service: { data: { type: 'services', id: serviceId } },
+          },
+          type: 'time-entries',
         },
-        relationships: {
-          person: { data: { type: 'people', id: userId } },
-          service: { data: { type: 'services', id: serviceId } },
-        },
-        type: 'time-entries',
       },
-    },
-    headers
-  );
+      headers
+    );
+  }
+
+  static async clockFood(headers, config, today) {
+    const matchingDeal = await Api.get(
+      `deals?filter[query]=operations%20general&filter[date][lt_eq]=${today}&filter[end_date][gt_eq]=${today}`,
+      headers
+    );
+  
+    const matchingService = await Api.get(
+      `services?filter[name]=food&filter[deal_id]=${matchingDeal.data[0].id}`,
+      headers
+    );
+  
+    const userId = config.userId;
+    const serviceId = matchingService.data[0].id;
+  
+    await createTimeEntry(30, '', today, userId, serviceId, headers);
+  }
 }
 
-async function clockFood(headers, config, today) {
-  const matchingDeal = await get(
-    `deals?filter[query]=operations%20general&filter[date][lt_eq]=${today}&filter[end_date][gt_eq]=${today}`,
-    headers
-  );
-
-  const matchingService = await get(
-    `services?filter[name]=food&filter[deal_id]=${matchingDeal.data[0].id}`,
-    headers
-  );
-
-  const userId = config.userId;
-  const serviceId = matchingService.data[0].id;
-
-  await createTimeEntry(30, '', today, userId, serviceId, headers);
-}
-
-module.exports = {
-  clockFood,
-  createTimeEntry,
-};
+module.exports = TimeEntry;
