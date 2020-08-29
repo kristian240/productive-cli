@@ -1,9 +1,9 @@
 class Utils {
   static parseTime(time) {
     // if time is number it is
-    if (time?.match(/^\d+$/)) return +time;
+    if (Utils.isNumber(time)) return +time;
     time = time.replace(/\s*/g, '').replace(/(\d*):(\d+)/g, (_, h, m) => `${h || '0'}h${m}m`);
-    if (!time.match(/[\+-\*/]/g)) {
+    if (!time.match(/[-+]/)) {
       return Utils.parseTimeSegment(time);
     }
     // TODO: calculations
@@ -18,6 +18,10 @@ class Utils {
     m = m || 0;
 
     return h * 60 + +m;
+  }
+
+  static isNumber(value) {
+    return Boolean(value && value.match(/^\d+$/));
   }
 }
 
