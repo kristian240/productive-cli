@@ -233,6 +233,8 @@ const CONFIG_PATH = `${homedir}/.productivecli`;
     .describe('n', 'Note')
     .alias('d', 'date')
     .describe('d', 'Date (yyyy-mm-dd)')
+    .alias('t', 'task')
+    .describe('t', 'Task')
     .help('h')
     .alias('h', 'help').argv;
 })();
