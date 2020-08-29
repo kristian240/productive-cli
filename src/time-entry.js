@@ -1,4 +1,5 @@
 const Api = require('./api');
+const Utils = require('./utils');
 
 class TimeEntry {
   static async createTimeEntry(time, note, today, userId, serviceId, headers) {
@@ -8,7 +9,7 @@ class TimeEntry {
         data: {
           attributes: {
             date: today,
-            time,
+            time: Utils.parseTime(time),
             billable_time: time,
             note,
           },
