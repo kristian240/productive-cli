@@ -1,12 +1,12 @@
 class Utils {
   static parseTime(time) {
     // if time is number it is
-    if (!isNaN(+time)) return +time;
+    if (time?.match(/^\d+$/)) return +time;
     time = time.replace(/\s*/g, '').replace(/(\d*):(\d+)/g, (_, h, m) => `${h || '0'}h${m}m`);
-    if (!time.match(/[+-]/g)) {
+    if (!time.match(/[\+-\*/]/g)) {
       return Utils.parseTimeSegment(time);
     }
-    // do calculations
+    // TODO: calculations
   }
 
   static parseTimeSegment(timeSegment) {
