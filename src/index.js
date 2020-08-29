@@ -16,10 +16,9 @@ const CONFIG_PATH = `${homedir}/.productivecli`;
   const today = format(new Date(), 'yyyy-MM-dd');
 
   const config = await Config.getConfig(CONFIG_PATH);
+
   if (!config) {
-    let text = "This is your first run, let's first configure it!\n";
-    text += 'You can find your token here:\nhttps://app.productive.io/1-infinum/settings/security';
-    Logger.BoxPrint(text);
+    Logger.BoxPrint('This is your first run so we need to log you in first!');
 
     await Config.initConfig(CONFIG_PATH);
 

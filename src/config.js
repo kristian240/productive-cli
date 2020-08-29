@@ -4,6 +4,7 @@ const inquirer = require('inquirer');
 const Api = require('./api');
 const packageJson = require('../package.json');
 const Logger = require('./logger');
+const Session = require('./session');
 
 const readFile = promisify(fs.readFile);
 const writeFile = promisify(fs.writeFile);
@@ -17,7 +18,7 @@ class Config {
 
     return matchingDeal.data.map((d) => ({
       value: { dealId: d.id, projectId: d.relationships.project.data.id },
-      name: `${d.attributes.name} ${d.attributes.date}`,
+      name: `${d.attributes.name}`,
     }));
   }
 
@@ -30,26 +31,22 @@ class Config {
   }
 
   static async createConfig() {
-    const { token } = await inquirer.prompt([
-      {
-        message: 'Productive.io token',
-        name: 'token',
-        type: 'password',
-      },
-    ]);
+    const session = await Session.create();
+
+    if (!session) {
+      return;
+    }
+
+    const { token, sessionId } = session;
 
     const org = await Api.get('organization_memberships', {
       'Content-Type': 'application/vnd.api+json',
       'X-Auth-Token': token,
     });
 
-    if (!org.data) {
-      Logger.Log('Something went wrong... Check your token!');
-      return;
-    }
-
     return {
       token,
+      sessionId,
       orgId: org.data[0].relationships.organization.data.id,
       userId: org.data[0].relationships.person.data.id,
       services: [],

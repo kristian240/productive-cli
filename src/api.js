@@ -27,6 +27,15 @@ class Api {
     return res.json();
   }
 
+  static async put(path, data, headers) {
+    const res = await fetch(`https://api.productive.io/api/v2/${path}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+      headers,
+    });
+    return res.json();
+  }
+
   static async fetchRemotePacakge() {
     const res = await fetch('https://raw.githubusercontent.com/andreicek/productive-cli/master/package.json');
     return res.json();
