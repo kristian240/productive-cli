@@ -53,24 +53,26 @@ const CONFIG_PATH = `${homedir}/.productivecli`;
       }
 
       // user told us only the service
-      const { pick } = typeof argv.service !== 'undefined'
-        ? { pick: argv.service === 'food' ? 'food' : config.services[argv.service].serviceId }
-        : await inquirer.prompt([
-          {
-            type: 'list',
-            message: 'Pick an option',
-            name: 'pick',
-            choices: [
-              ...config.services.map((s) => ({
-                value: s.serviceId,
-                name: `Clock on: ${s.dealName} - ${s.serviceName}`,
-              })),
+      const { pick } =
+        typeof argv.service !== 'undefined'
+          ? { pick: argv.service === 'food' ? 'food' : config.services[argv.service].serviceId }
+          : await inquirer.prompt([
               {
-                value: 'food', name: 'Clock 30mins at food',
+                type: 'list',
+                message: 'Pick an option',
+                name: 'pick',
+                choices: [
+                  ...config.services.map((s) => ({
+                    value: s.serviceId,
+                    name: `Clock on: ${s.dealName} - ${s.serviceName}`,
+                  })),
+                  {
+                    value: 'food',
+                    name: 'Clock 30mins at food',
+                  },
+                ],
               },
-            ],
-          },
-        ]);
+            ]);
 
       if (pick === 'food') {
         await TimeEntry.clockFood(headers, config, argv.date || today);
@@ -85,7 +87,9 @@ const CONFIG_PATH = `${homedir}/.productivecli`;
             name: 'time',
           },
           !argv.note && {
-            type: 'input', message: 'Note', name: 'note',
+            type: 'input',
+            message: 'Note',
+            name: 'note',
           },
         ].filter(Boolean)
       );
@@ -123,7 +127,9 @@ const CONFIG_PATH = `${homedir}/.productivecli`;
           ],
         },
         {
-          type: 'input', message: 'Note', name: 'note',
+          type: 'input',
+          message: 'Note',
+          name: 'note',
         },
       ]);
 
