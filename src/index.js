@@ -15,10 +15,9 @@ const CONFIG_PATH = `${homedir}/.productivecli`;
   const today = format(new Date(), 'yyyy-MM-dd');
 
   const config = await Config.getConfig(CONFIG_PATH);
+
   if (!config) {
-    let text = 'This is your first run, let\'s first configure it!\n';
-    text += 'You can find your token here:\nhttps://app.productive.io/1-infinum/settings/security';
-    console.log(boxen(text, { padding: 1 }));
+    console.log(boxen('This is your first run so we need to log you in first!', { padding: 1 }));
 
     await Config.initConfig(CONFIG_PATH);
 
@@ -130,9 +129,13 @@ const CONFIG_PATH = `${homedir}/.productivecli`;
     .command('stats', 'Show stats', async ({ argv }) => {
       await Overtime.showStats(headers, config.userId, argv.date || today);
     })
-    .command('overtime', 'Show overtime for this month (does not include today)', async ({argv}) => {
-      await Overtime.showOvertime(headers, config.userId, argv.date || today);
-    })
+    .command(
+      'overtime',
+      'Show overtime for this month (does not include today)',
+      async ({ argv }) => {
+        await Overtime.showOvertime(headers, config.userId, argv.date || today);
+      }
+    )
     .demandCommand(1)
     .alias('s', 'service')
     .describe('s', 'Service')
