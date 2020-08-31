@@ -34,8 +34,8 @@ const CONFIG_PATH = `${homedir}/.productivecli`;
   // eslint-disable-next-line no-unused-expressions
   require('yargs')
     .usage('Usage: $0 <command> [options]')
-    .command('config', 'Add new services', async () => {
-      await Config.createNewProjectEntry(today, headers, CONFIG_PATH, config);
+    .command('config', 'Add new services', async ({ argv }) => {
+      await Config.createNewProjectEntry(argv.date || today, headers, CONFIG_PATH, config);
     })
     .command('clock', 'Create a new entry', async ({ argv }) => {
       // user told us everything
