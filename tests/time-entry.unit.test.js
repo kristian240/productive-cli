@@ -1,6 +1,6 @@
 const Simple = require('simple-mock');
 const TimeEntry = require('../src/time-entry');
-const Api = require('../src/Api');
+const Api = require('../src/api');
 
 describe('Time entry service: create time entry', () => {
   afterEach(() => Simple.restore());
