@@ -4,7 +4,7 @@ const Utils = require('../src/utils');
 describe('Time parsing', () => {
   afterEach(() => Simple.restore());
 
-  it("shouldn't parse number", async () => {
+  it('should parse integer as minutes', async () => {
     const parsedTime = Utils.parseTime('10');
 
     expect(parsedTime).toEqual(10);
