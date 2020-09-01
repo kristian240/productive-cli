@@ -47,9 +47,7 @@ class Api {
     or it can search by type and id
   */
   static findInInluded(included, type, id) {
-    return included.find((i) =>
-      typeof id === 'undefined' ? type === i.type : id === i.id && type === i.type
-    );
+    return included.find((i) => (typeof id === 'undefined' ? type === i.type : id === i.id && type === i.type));
   }
 }
 

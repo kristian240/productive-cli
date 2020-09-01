@@ -27,13 +27,13 @@ class TimeEntry {
             },
             ...(task
               ? {
-                  task: {
-                    data: {
-                      type: 'tasks',
-                      id: task,
-                    },
+                task: {
+                  data: {
+                    type: 'tasks',
+                    id: task,
                   },
-                }
+                },
+              }
               : {}),
           },
           type: 'time-entries',

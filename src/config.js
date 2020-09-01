@@ -17,7 +17,10 @@ class Config {
     );
 
     return matchingDeal.data.map((d) => ({
-      value: { dealId: d.id, projectId: d.relationships.project.data.id },
+      value: {
+        dealId: d.id,
+        projectId: d.relationships.project.data.id,
+      },
       name: `${d.attributes.name}`,
     }));
   }
