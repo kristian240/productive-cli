@@ -53,26 +53,25 @@ const CONFIG_PATH = `${homedir}/.productivecli`;
       }
 
       // user told us only the service
-      const { pick } =
-        typeof argv.service !== 'undefined'
-          ? { pick: argv.service === 'food' ? 'food' : config.services[argv.service].serviceId }
-          : await inquirer.prompt([
+      const { pick } = typeof argv.service !== 'undefined'
+        ? { pick: argv.service === 'food' ? 'food' : config.services[argv.service].serviceId }
+        : await inquirer.prompt([
+          {
+            type: 'list',
+            message: 'Pick an option',
+            name: 'pick',
+            choices: [
+              ...config.services.map((s) => ({
+                value: s.serviceId,
+                name: `Clock on: ${s.dealName} - ${s.serviceName}`,
+              })),
               {
-                type: 'list',
-                message: 'Pick an option',
-                name: 'pick',
-                choices: [
-                  ...config.services.map((s) => ({
-                    value: s.serviceId,
-                    name: `Clock on: ${s.dealName} - ${s.serviceName}`,
-                  })),
-                  {
-                    value: 'food',
-                    name: 'Clock 30mins at food',
-                  },
-                ],
+                value: 'food',
+                name: 'Clock 30mins at food',
               },
-            ]);
+            ],
+          },
+        ]);
 
       if (pick === 'food') {
         await TimeEntry.clockFood(headers, config, argv.date || today);
