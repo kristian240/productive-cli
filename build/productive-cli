@@ -19253,8 +19253,8 @@ const CONFIG_PATH = `${homedir}/.productivecli`;
   // eslint-disable-next-line no-unused-expressions
   __webpack_require__(415)
     .usage('Usage: $0 <command> [options]')
-    .command('config', 'Add new services', async () => {
-      await Config.createNewProjectEntry(today, headers, CONFIG_PATH, config);
+    .command('config', 'Add new services', async ({ argv }) => {
+      await Config.createNewProjectEntry(argv.date || today, headers, CONFIG_PATH, config);
     })
     .command('clock', 'Create a new entry', async ({ argv }) => {
       // user told us everything
@@ -34645,7 +34645,7 @@ module.exports = Config;
 /* 398 */
 /***/ (function(module) {
 
-module.exports = JSON.parse("{\"name\":\"productive-cli\",\"version\":\"1.5.0\",\"description\":\"The missing and working Productive.io clocking CLI\",\"main\":\"src/index.js\",\"scripts\":{\"build\":\"webpack-cli\",\"test\":\"jest\",\"lint\":\"eslint src/* tests/*\"},\"author\":\"Andrei Zvonimir Crnkovic <andreicek@hey.com>\",\"license\":\"MIT\",\"devDependencies\":{\"boxen\":\"^4.2.0\",\"date-fns\":\"^2.15.0\",\"eslint\":\"^7.7.0\",\"eslint-config-airbnb-base\":\"^14.2.0\",\"eslint-plugin-import\":\"^2.22.0\",\"inquirer\":\"^7.3.0\",\"jest\":\"^26.4.2\",\"json-loader\":\"^0.5.7\",\"node-fetch\":\"^2.6.0\",\"simple-mock\":\"^0.8.0\",\"webpack\":\"^4.44.1\",\"webpack-cli\":\"^3.3.12\",\"yargs\":\"^15.4.0\"},\"bin\":{\"productive-cli\":\"build/productive-cli\"}}");
+module.exports = JSON.parse("{\"name\":\"productive-cli\",\"version\":\"1.5.1\",\"description\":\"The missing and working Productive.io clocking CLI\",\"main\":\"src/index.js\",\"scripts\":{\"build\":\"webpack-cli\",\"test\":\"jest\",\"lint\":\"eslint src/* tests/*\"},\"author\":\"Andrei Zvonimir Crnkovic <andreicek@hey.com>\",\"license\":\"MIT\",\"devDependencies\":{\"boxen\":\"^4.2.0\",\"date-fns\":\"^2.15.0\",\"eslint\":\"^7.7.0\",\"eslint-config-airbnb-base\":\"^14.2.0\",\"eslint-plugin-import\":\"^2.22.0\",\"inquirer\":\"^7.3.0\",\"jest\":\"^26.4.2\",\"json-loader\":\"^0.5.7\",\"node-fetch\":\"^2.6.0\",\"simple-mock\":\"^0.8.0\",\"webpack\":\"^4.44.1\",\"webpack-cli\":\"^3.3.12\",\"yargs\":\"^15.4.0\"},\"bin\":{\"productive-cli\":\"build/productive-cli\"}}");
 
 /***/ }),
 /* 399 */
