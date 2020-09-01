@@ -21,7 +21,7 @@ class Utils {
   }
 
   static isNumber(value) {
-    return Boolean(value && value.match(/^\d+$/));
+    return typeof value === 'number' || Boolean(value && value.match(/^\d+$/));
   }
 }
 
