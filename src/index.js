@@ -55,58 +55,45 @@ const CONFIG_PATH = `${homedir}/.productivecli`;
       }
 
       // user told us only the service
-      const { pick } =
-        typeof argv.service !== 'undefined'
-          ? { pick: argv.service === 'food' ? 'food' : config.services[argv.service].serviceId }
-          : await inquirer.prompt([
+      const { pick } = typeof argv.service !== 'undefined'
+        ? { pick: argv.service === 'food' ? 'food' : config.services[argv.service].serviceId }
+        : await inquirer.prompt([
+          {
+            type: 'list',
+            message: 'Pick an option',
+            name: 'pick',
+            choices: [
+              ...config.services.map((s) => ({
+                value: s.serviceId,
+                name: `Clock on: ${s.dealName} - ${s.serviceName}`,
+              })),
               {
-                type: 'list',
-                message: 'Pick an option',
-                name: 'pick',
-                choices: [
-                  ...config.services.map((s) => ({
-                    value: s.serviceId,
-                    name: `Clock on: ${s.dealName} - ${s.serviceName}`,
-                  })),
-                  {
-                    value: 'food',
-                    name: 'Clock 30mins at food',
-                  },
-                ],
+                value: 'food',
+                name: 'Clock 30mins at food',
               },
-            ]);
+            ],
+          },
+        ]);
 
       if (pick === 'food') {
         await TimeEntry.clockFood(headers, config, argv.date || today);
         return;
       }
 
-      let task = argv.task;
+      let { task } = argv;
 
       if (!task) {
-        const { withTask } = await inquirer.prompt([
+        const { taskName } = await inquirer.prompt([
           {
-            type: 'list',
-            message: 'Clock on task',
-            name: 'withTask',
-            choices: [
-              {
-                value: true,
-                name: 'Yes',
-              },
-              {
-                value: false,
-                name: 'No',
-              },
-            ],
+            type: 'input',
+            message: 'Search for a task for by name (or leave it empty to skip time tracking on task)',
+            name: 'taskName',
           },
         ]);
 
-        if (withTask) {
-          let projectId = (
-            config.services[argv.service] ||
-            config.services.find((service) => service.serviceId === pick)
-          ).projectId;
+        if (taskName) {
+          let { projectId } = config.services[argv.service]
+            || config.services.find((service) => service.serviceId === pick);
 
           // if the service is added before task feature there is no projectId in services array
           if (!projectId) {
@@ -116,23 +103,16 @@ const CONFIG_PATH = `${homedir}/.productivecli`;
 
             projectId = id;
 
-            // TODO: write it to config file for nex time
+            // TODO: write it to config file for next time
           }
-
-          const { taskName } = await inquirer.prompt([
-            {
-              type: 'input',
-              message: 'Search for a task for by name',
-              name: 'taskName',
-            },
-          ]);
 
           const tasks = await Api.get(
             `tasks?filter[project_id][eq]=${projectId}&filter[title][contains]=${taskName}&sort=title`,
             headers
-          ).then(({ data: tasks }) =>
-            tasks.map((task) => ({ value: task.id, name: task.attributes.title }))
-          );
+          ).then(({ data }) => data.map((taskData) => ({
+            value: taskData.id,
+            name: taskData.attributes.title,
+          })));
 
           const { taskId } = await inquirer.prompt([
             {
