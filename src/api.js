@@ -40,6 +40,15 @@ class Api {
     const res = await fetch('https://raw.githubusercontent.com/andreicek/productive-cli/master/package.json');
     return res.json();
   }
+
+  /**
+    Function that search the included data in the response.
+    It can search only by type (returns first one that maches)
+    or it can search by type and id
+  */
+  static findInInluded(included, type, id) {
+    return included.find((i) => (typeof id === 'undefined' ? type === i.type : id === i.id && type === i.type));
+  }
 }
 
 module.exports = Api;

@@ -2,7 +2,7 @@ const Api = require('./api');
 const Utils = require('./utils');
 
 class TimeEntry {
-  static async createTimeEntry(time, note, today, userId, serviceId, headers) {
+  static async createTimeEntry(time, note, task, today, userId, serviceId, headers) {
     return Api.post(
       'time_entries',
       {
@@ -26,6 +26,16 @@ class TimeEntry {
                 id: serviceId,
               },
             },
+            ...(task
+              ? {
+                task: {
+                  data: {
+                    type: 'tasks',
+                    id: task,
+                  },
+                },
+              }
+              : {}),
           },
           type: 'time-entries',
         },
