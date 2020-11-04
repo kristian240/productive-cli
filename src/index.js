@@ -7,6 +7,7 @@ const TimeEntry = require('./time-entry');
 const Config = require('./config');
 const Reports = require('./reports');
 const Logger = require('./logger');
+const Api = require('./api');
 
 const CONFIG_PATH = `${homedir}/.productivecli`;
 
@@ -34,8 +35,8 @@ const CONFIG_PATH = `${homedir}/.productivecli`;
   // eslint-disable-next-line no-unused-expressions
   require('yargs')
     .usage('Usage: $0 <command> [options]')
-    .command('config', 'Add new services', async () => {
-      await Config.createNewProjectEntry(today, headers, CONFIG_PATH, config);
+    .command('config', 'Add new services', async ({ argv }) => {
+      await Config.createNewProjectEntry(argv.date || today, headers, CONFIG_PATH, config);
     })
     .command('clock', 'Create a new entry', async ({ argv }) => {
       // user told us everything
@@ -44,6 +45,7 @@ const CONFIG_PATH = `${homedir}/.productivecli`;
         await TimeEntry.createTimeEntry(
           argv.time,
           argv.note || '',
+          argv.task || undefined,
           today,
           config.userId,
           serviceId,
@@ -78,6 +80,53 @@ const CONFIG_PATH = `${homedir}/.productivecli`;
         return;
       }
 
+      let { task } = argv;
+
+      if (!task) {
+        const { taskName } = await inquirer.prompt([
+          {
+            type: 'input',
+            message: 'Search for a task for by name (or leave it empty to skip time tracking on task)',
+            name: 'taskName',
+          },
+        ]);
+
+        if (taskName) {
+          let { projectId } = config.services[argv.service]
+            || config.services.find((service) => service.serviceId === pick);
+
+          // if the service is added before task feature there is no projectId in services array
+          if (!projectId) {
+            const { included } = await Api.get('services/536162?include=deal.project', headers);
+
+            const { id } = Api.findInInluded(included, 'projects');
+
+            projectId = id;
+
+            // TODO: write it to config file for next time
+          }
+
+          const tasks = await Api.get(
+            `tasks?filter[project_id][eq]=${projectId}&filter[title][contains]=${taskName}&sort=title`,
+            headers
+          ).then(({ data }) => data.map((taskData) => ({
+            value: taskData.id,
+            name: taskData.attributes.title,
+          })));
+
+          const { taskId } = await inquirer.prompt([
+            {
+              type: 'list',
+              message: 'Pick a task from the list',
+              name: 'taskId',
+              choices: tasks,
+            },
+          ]);
+
+          task = taskId;
+        }
+      }
+
       const { time = argv.time, note = argv.note } = await inquirer.prompt(
         [
           !argv.time && {
@@ -93,7 +142,15 @@ const CONFIG_PATH = `${homedir}/.productivecli`;
         ].filter(Boolean)
       );
 
-      await TimeEntry.createTimeEntry(time, note, argv.date || today, config.userId, pick, headers);
+      await TimeEntry.createTimeEntry(
+        time,
+        note,
+        task,
+        argv.date || today,
+        config.userId,
+        pick,
+        headers
+      );
     })
     .command('timer', 'Start a timer', async () => {
       const timer = await Timer.getRunningTimer(headers, config.userId, today);
@@ -156,6 +213,8 @@ const CONFIG_PATH = `${homedir}/.productivecli`;
     .describe('n', 'Note')
     .alias('d', 'date')
     .describe('d', 'Date (yyyy-mm-dd)')
+    .alias('t', 'task')
+    .describe('t', 'Task')
     .help('h')
     .alias('h', 'help').argv;
 })();
