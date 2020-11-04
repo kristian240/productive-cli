@@ -1,12 +1,13 @@
 const homedir = require('os').homedir();
 const { format } = require('date-fns');
 const inquirer = require('inquirer');
-const boxen = require('boxen');
 
 const Timer = require('./timer');
 const TimeEntry = require('./time-entry');
 const Config = require('./config');
-const Overtime = require('./overtime');
+const Reports = require('./reports');
+const Logger = require('./logger');
+const Api = require('./api');
 
 const CONFIG_PATH = `${homedir}/.productivecli`;
 
@@ -17,11 +18,11 @@ const CONFIG_PATH = `${homedir}/.productivecli`;
   const config = await Config.getConfig(CONFIG_PATH);
 
   if (!config) {
-    console.log(boxen('This is your first run so we need to log you in first!', { padding: 1 }));
+    Logger.BoxPrint('This is your first run so we need to log you in first!');
 
     await Config.initConfig(CONFIG_PATH);
 
-    console.log('Awesome! Now run productive-cli config to get started!');
+    Logger.Log('Awesome! Now run productive-cli config to get started!');
     return;
   }
 
@@ -31,18 +32,20 @@ const CONFIG_PATH = `${homedir}/.productivecli`;
     'X-Organization-Id': config.orgId,
   };
 
-  const argv = require('yargs')
+  // eslint-disable-next-line no-unused-expressions
+  require('yargs')
     .usage('Usage: $0 <command> [options]')
-    .command('config', 'Add new services', async () => {
-      await Config.createNewProjectEntry(today, headers, CONFIG_PATH, config);
+    .command('config', 'Add new services', async ({ argv }) => {
+      await Config.createNewProjectEntry(argv.date || today, headers, CONFIG_PATH, config);
     })
     .command('clock', 'Create a new entry', async ({ argv }) => {
       // user told us everything
       if (typeof argv.service !== 'undefined' && argv.time) {
-        const serviceId = config.services[argv.service].serviceId;
+        const { serviceId } = config.services[argv.service];
         await TimeEntry.createTimeEntry(
           argv.time,
           argv.note || '',
+          argv.task || undefined,
           today,
           config.userId,
           serviceId,
@@ -52,41 +55,102 @@ const CONFIG_PATH = `${homedir}/.productivecli`;
       }
 
       // user told us only the service
-      const { pick } =
-        typeof argv.service !== 'undefined'
-          ? { pick: argv.service === 'food' ? 'food' : config.services[argv.service].serviceId }
-          : await inquirer.prompt([
+      const { pick } = typeof argv.service !== 'undefined'
+        ? { pick: argv.service === 'food' ? 'food' : config.services[argv.service].serviceId }
+        : await inquirer.prompt([
+          {
+            type: 'list',
+            message: 'Pick an option',
+            name: 'pick',
+            choices: [
+              ...config.services.map((s) => ({
+                value: s.serviceId,
+                name: `Clock on: ${s.dealName} - ${s.serviceName}`,
+              })),
               {
-                type: 'list',
-                message: 'Pick an option',
-                name: 'pick',
-                choices: [
-                  ...config.services.map((s) => ({
-                    value: s.serviceId,
-                    name: `Clock on: ${s.dealName} - ${s.serviceName}`,
-                  })),
-                  { value: 'food', name: 'Clock 30mins at food' },
-                ],
+                value: 'food',
+                name: 'Clock 30mins at food',
               },
-            ]);
+            ],
+          },
+        ]);
 
       if (pick === 'food') {
         await TimeEntry.clockFood(headers, config, argv.date || today);
         return;
       }
 
+      let { task } = argv;
+
+      if (!task) {
+        const { taskName } = await inquirer.prompt([
+          {
+            type: 'input',
+            message: 'Search for a task for by name (or leave it empty to skip time tracking on task)',
+            name: 'taskName',
+          },
+        ]);
+
+        if (taskName) {
+          let { projectId } = config.services[argv.service]
+            || config.services.find((service) => service.serviceId === pick);
+
+          // if the service is added before task feature there is no projectId in services array
+          if (!projectId) {
+            const { included } = await Api.get('services/536162?include=deal.project', headers);
+
+            const { id } = Api.findInInluded(included, 'projects');
+
+            projectId = id;
+
+            // TODO: write it to config file for next time
+          }
+
+          const tasks = await Api.get(
+            `tasks?filter[project_id][eq]=${projectId}&filter[title][contains]=${taskName}&sort=title`,
+            headers
+          ).then(({ data }) => data.map((taskData) => ({
+            value: taskData.id,
+            name: taskData.attributes.title,
+          })));
+
+          const { taskId } = await inquirer.prompt([
+            {
+              type: 'list',
+              message: 'Pick a task from the list',
+              name: 'taskId',
+              choices: tasks,
+            },
+          ]);
+
+          task = taskId;
+        }
+      }
+
       const { time = argv.time, note = argv.note } = await inquirer.prompt(
         [
-          !Boolean(argv.time) && {
+          !argv.time && {
             type: 'input',
             message: 'Number of minutes to clock',
             name: 'time',
           },
-          !Boolean(argv.note) && { type: 'input', message: 'Note', name: 'note' },
+          !argv.note && {
+            type: 'input',
+            message: 'Note',
+            name: 'note',
+          },
         ].filter(Boolean)
       );
 
-      await TimeEntry.createTimeEntry(time, note, argv.date || today, config.userId, pick, headers);
+      await TimeEntry.createTimeEntry(
+        time,
+        note,
+        task,
+        argv.date || today,
+        config.userId,
+        pick,
+        headers
+      );
     })
     .command('timer', 'Start a timer', async () => {
       const timer = await Timer.getRunningTimer(headers, config.userId, today);
@@ -118,7 +182,11 @@ const CONFIG_PATH = `${homedir}/.productivecli`;
             })),
           ],
         },
-        { type: 'input', message: 'Note', name: 'note' },
+        {
+          type: 'input',
+          message: 'Note',
+          name: 'note',
+        },
       ]);
 
       const entry = await TimeEntry.createTimeEntry(0, note, today, config.userId, pick, headers);
@@ -127,13 +195,13 @@ const CONFIG_PATH = `${homedir}/.productivecli`;
       await Timer.startTimer(entryId, headers);
     })
     .command('stats', 'Show stats', async ({ argv }) => {
-      await Overtime.showStats(headers, config.userId, argv.date || today);
+      await Reports.showStats(headers, config.userId, argv.date || today);
     })
     .command(
       'overtime',
       'Show overtime for this month (does not include today)',
       async ({ argv }) => {
-        await Overtime.showOvertime(headers, config.userId, argv.date || today);
+        await Reports.showOvertime(headers, config.userId, argv.date || today);
       }
     )
     .demandCommand(1)
@@ -145,6 +213,8 @@ const CONFIG_PATH = `${homedir}/.productivecli`;
     .describe('n', 'Note')
     .alias('d', 'date')
     .describe('d', 'Date (yyyy-mm-dd)')
+    .alias('t', 'task')
+    .describe('t', 'Task')
     .help('h')
     .alias('h', 'help').argv;
 })();
