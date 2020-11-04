@@ -26,8 +26,19 @@ async function patch(path, data, headers) {
   return await res.json();
 }
 
-async function fetchRemotePacakge(path, data, headers) {
-  const res = await fetch('https://raw.githubusercontent.com/andreicek/productive-cli/master/package.json');
+async function put(path, data, headers) {
+  const res = await fetch(`https://api.productive.io/api/v2/${path}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+    headers,
+  });
+  return await res.json();
+}
+
+async function fetchRemotePacakge() {
+  const res = await fetch(
+    'https://raw.githubusercontent.com/andreicek/productive-cli/master/package.json'
+  );
   return await res.json();
 }
 
@@ -35,5 +46,6 @@ module.exports = {
   get,
   post,
   patch,
+  put,
   fetchRemotePacakge,
 };

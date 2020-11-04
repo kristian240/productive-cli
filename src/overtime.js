@@ -26,7 +26,7 @@ async function showOvertime(headers, userId, today) {
 
   const { data: [report] = [] } = await get(
     `time_reports?filter[person_id]=${userId}&filter[before]=${endDate}&filter[after]=${startDate}`,
-    headers,
+    headers
   );
 
   if (!report) {
